@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SDC Editora — Transforme sua história em um livro</title>
+  <meta name="description" content="A SDC Editora acompanha todo o processo para transformar a sua história em um livro publicado." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --radius: 0.625rem;
+      --background: oklch(0.13 0.01 260);
+      --foreground: oklch(0.95 0.01 80);
+      --card: oklch(0.18 0.01 260);
+      --card-foreground: oklch(0.95 0.01 80);
+      --primary: oklch(0.75 0.12 70);
+      --primary-foreground: oklch(0.13 0.01 260);
+      --secondary: oklch(0.22 0.01 260);
+      --muted: oklch(0.22 0.01 260);
+      --muted-foreground: oklch(0.6 0.02 260);
+      --border: oklch(0.28 0.01 260);
+      --input: oklch(0.25 0.01 260);
+      --destructive: oklch(0.577 0.245 27.325);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── COOKIE BANNER ── */
+    #cookie-banner {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      animation: slideUp 0.4s ease;
+    }
+    #cookie-banner.hidden { display: none; }
+    #cookie-banner p { flex: 1; font-size: 0.875rem; color: var(--muted-foreground); min-width: 200px; }
+    #cookie-banner a { color: var(--primary); text-decoration: underline; }
+    #cookie-banner .btn-group { display: flex; gap: 0.5rem; flex-shrink: 0; }
+    #cookie-banner button {
+      padding: 0.5rem 1.25rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.2s;
+    }
+    #cookie-banner button:hover { opacity: 0.85; }
+    #btn-accept { background: var(--primary); color: var(--primary-foreground); }
+    #btn-decline { background: var(--secondary); color: var(--foreground); }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0);   opacity: 1; }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 1.5rem;
+      text-align: center;
+      overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute;
+      top: 25%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 600px;
+      border-radius: 9999px;
+      background: color-mix(in oklch, var(--primary) 5%, transparent);
+      filter: blur(120px);
+      pointer-events: none;
+    }
+    .hero-line {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 1px;
+      background: linear-gradient(to right, transparent, color-mix(in oklch, var(--primary) 30%, transparent), transparent);
+    }
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 48rem;
+    }
+    .hero-logo {
+      width: 12rem;
+      margin-bottom: 2.5rem;
+      border-radius: 0.5rem;
+    }
+    @media (min-width: 768px) { .hero-logo { width: 16rem; } }
+    .hero h1 {
+      font-size: clamp(2.25rem, 6vw, 4.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 span { color: var(--primary); }
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.25rem);
+      color: var(--muted-foreground);
+      max-width: 36rem;
+      margin-bottom: 2.5rem;
+      line-height: 1.7;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--primary);
+      color: var(--primary-foreground);
+      padding: 1rem 2rem;
+      border-radius: 9999px;
+      font-size: 1.125rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: box-shadow 0.3s, transform 0.15s;
+      box-shadow: 0 8px 24px color-mix(in oklch, var(--primary) 20%, transparent);
+    }
+    .btn-primary:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 32px color-mix(in oklch, var(--primary) 40%, transparent);
+    }
+    .btn-primary:active { transform: scale(0.97); }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .scroll-mouse {
+      width: 1.5rem; height: 2.5rem;
+      border: 2px solid color-mix(in oklch, var(--muted-foreground) 30%, transparent);
+      border-radius: 9999px;
+      display: flex;
+      justify-content: center;
+      padding-top: 0.5rem;
+    }
+    .scroll-dot {
+      width: 0.375rem; height: 0.375rem;
+      border-radius: 9999px;
+      background: var(--primary);
+      animation: scrollBounce 1.5s infinite;
+    }
+    @keyframes scrollBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(12px); }
+    }
+
+    /* ── SERVICES ── */
+    .services {
+      position: relative;
+      padding: 6rem 1.5rem;
+    }
+    .section-label {
+      color: var(--primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      font-size: clamp(1.75rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 0;
+    }
+    .section-header { text-align: center; margin-bottom: 4rem; }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      max-width: 64rem;
+      margin: 0 auto;
+    }
+    .service-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) * 2);
+      padding: 2rem;
+      transition: border-color 0.3s;
+    }
+    .service-card:hover { border-color: color-mix(in oklch, var(--primary) 40%, transparent); }
+    .service-icon {
+      width: 3rem; height: 3rem;
+      border-radius: calc(var(--radius) * 1.5);
+      background: color-mix(in oklch, var(--primary) 10%, transparent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      transition: background 0.3s;
+    }
+    .service-card:hover .service-icon { background: color-mix(in oklch, var(--primary) 20%, transparent); }
+    .service-icon svg { color: var(--primary); width: 1.5rem; height: 1.5rem; }
+    .service-card h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .service-card p { color: var(--muted-foreground); font-size: 0.875rem; line-height: 1.6; }
+
+    /* ── FORM SECTION ── */
+    .form-section {
+      position: relative;
+      padding: 6rem 1.5rem;
+      overflow: hidden;
+    }
+    .form-glow {
+      position: absolute;
+      bottom: 25%; right: 0;
+      width: 400px; height: 400px;
+      border-radius: 9999px;
+      background: color-mix(in oklch, var(--primary) 5%, transparent);
+      filter: blur(100px);
+      pointer-events: none;
+    }
+    .form-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 32rem;
+      margin: 0 auto;
+    }
+    .form-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) * 2);
+      padding: 2rem;
+    }
+
+    .field { margin-bottom: 1.25rem; }
+    .field label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.375rem;
+    }
+    .field input,
+    .field textarea {
+      width: 100%;
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      color: var(--foreground);
+      font-size: 0.9375rem;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      resize: vertical;
+    }
+    .field input:focus,
+    .field textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 20%, transparent);
+    }
+    .field textarea { min-height: 120px; }
+
+    .consent-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.625rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.8125rem;
+      color: var(--muted-foreground);
+    }
+    .consent-row input[type="checkbox"] {
+      width: 1rem; height: 1rem;
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+    .consent-row a { color: var(--primary); text-decoration: underline; }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      color: var(--primary-foreground);
+      border: none;
+      border-radius: 9999px;
+      padding: 0.875rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-submit:hover:not(:disabled) { opacity: 0.9; }
+    .btn-submit:active:not(:disabled) { transform: scale(0.98); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .success-box {
+      background: var(--card);
+      border: 1px solid color-mix(in oklch, var(--primary) 30%, transparent);
+      border-radius: calc(var(--radius) * 2);
+      padding: 3rem 2rem;
+      text-align: center;
+      display: none;
+    }
+    .success-box.visible { display: block; }
+    .success-icon {
+      width: 4rem; height: 4rem;
+      border-radius: 9999px;
+      background: color-mix(in oklch, var(--primary) 10%, transparent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+    .success-icon svg { color: var(--primary); width: 2rem; height: 2rem; }
+    .success-box h3 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .success-box p { color: var(--muted-foreground); }
+
+    .error-msg {
+      background: color-mix(in oklch, var(--destructive) 10%, transparent);
+      border: 1px solid color-mix(in oklch, var(--destructive) 30%, transparent);
+      border-radius: var(--radius);
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      color: var(--destructive);
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .error-msg.visible { display: block; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2rem 1.5rem;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--muted-foreground);
+      border-top: 1px solid var(--border);
+    }
+    footer a { color: var(--primary); text-decoration: underline; }
+
+    /* ── FADE-IN ANIMATION ── */
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- COOKIE BANNER -->
+  <div id="cookie-banner">
+    <p>
+      Utilizamos cookies para melhorar a sua experiência. Ao continuar, concorda com a nossa
+      <a href="privacidade.html">Política de Privacidade</a> e com os nossos <a href="cookies.html">Cookies</a>.
+    </p>
+    <div class="btn-group">
+      <button id="btn-decline">Recusar</button>
+      <button id="btn-accept">Aceitar</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-line"></div>
+    <div class="hero-content fade-in">
+      <img src="logo.png" alt="SDC Editora" class="hero-logo" />
+      <h1>A sua história pode <span>transformar vidas</span></h1>
+      <p>Transforme a sua ideia em um livro publicado. Acompanhamos todo o processo, do manuscrito à publicação.</p>
+      <a href="#formulario" class="btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        Quero saber mais
+      </a>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-mouse"><div class="scroll-dot"></div></div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="services">
+    <div class="max-w-5xl mx-auto" style="max-width:64rem;margin:0 auto;">
+      <div class="section-header fade-in">
+        <p class="section-label">Nossos Serviços</p>
+        <h2 class="section-title">Tudo o que você precisa</h2>
+      </div>
+      <div class="services-grid">
+        <div class="service-card fade-in">
+          <div class="service-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+          </div>
+          <h3>Correção e Revisão</h3>
+          <p>Revisão profissional completa do seu texto</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+          </div>
+          <h3>Diagramação</h3>
+          <p>Layout editorial elegante e profissional</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+          </div>
+          <h3>Criação de Capa</h3>
+          <p>Design exclusivo que conta sua história</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+          </div>
+          <h3>Impressão</h3>
+          <p>Impressão de alta qualidade sob demanda</p>
+        </div>
+        <div class="service-card fade-in">
+          <div class="service-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+          </div>
+          <h3>Publicação Online</h3>
+          <p>Seu livro disponível nas maiores plataformas</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORM -->
+  <section id="formulario" class="form-section">
+    <div class="form-glow"></div>
+    <div class="form-wrapper">
+      <div class="section-header fade-in">
+        <p class="section-label">Interessado?</p>
+        <h2 class="section-title">Fale conosco</h2>
+        <p style="color:var(--muted-foreground);margin-top:1rem;">Preencha o formulário e entraremos em contato com você.</p>
+      </div>
+
+      <!-- Success state -->
+      <div class="success-box" id="success-box">
+        <div class="success-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h3>Mensagem enviada!</h3>
+        <p>Obrigado pelo interesse. Entraremos em contato em breve.</p>
+      </div>
+
+      <!-- Form -->
+      <div class="form-box fade-in" id="form-box">
+        <div class="error-msg" id="error-msg">Ocorreu um erro ao enviar. Por favor, tente novamente.</div>
+
+        <div class="field">
+          <label for="nome">Nome *</label>
+          <input type="text" id="nome" placeholder="O seu nome completo" required />
+        </div>
+        <div class="field">
+          <label for="email">Email *</label>
+          <input type="email" id="email" placeholder="o.seu@email.com" required />
+        </div>
+        <div class="field">
+          <label for="telefone">Telefone *</label>
+          <input type="tel" id="telefone" placeholder="+351 912 345 678" required />
+        </div>
+        <div class="field">
+          <label for="mensagem">Mensagem</label>
+          <textarea id="mensagem" placeholder="Conta-nos um pouco sobre o seu projeto..."></textarea>
+        </div>
+
+        <div class="consent-row">
+          <input type="checkbox" id="consent" />
+          <label for="consent">
+            Concordo com a <a href="privacidade.html" target="_blank">Política de Privacidade</a>
+            e com o uso de <a href="cookies.html" target="_blank">Cookies</a>.
+          </label>
+        </div>
+
+        <button class="btn-submit" id="btn-submit" onclick="handleSubmit()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="11" y1="2" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <span id="btn-text">Enviar mensagem</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2026 SDC Editora. Todos os direitos reservados. &nbsp;|&nbsp;
+      <a href="privacidade.html">Política de Privacidade</a> &nbsp;|&nbsp;
+      <a href="cookies.html">Cookies</a>
+    </p>
+  </footer>
+
+  <script>
+    const WEBHOOK_URL = "https://jorge-n8n.rijyaf.easypanel.host/webhook/35576f3d-26f5-40bf-bcd4-570238bcbd3d";
+
+    // ── Cookie banner ──
+    const banner = document.getElementById('cookie-banner');
+    if (localStorage.getItem('cookies-accepted')) banner.classList.add('hidden');
+    document.getElementById('btn-accept').addEventListener('click', () => {
+      localStorage.setItem('cookies-accepted', '1');
+      banner.classList.add('hidden');
+    });
+    document.getElementById('btn-decline').addEventListener('click', () => {
+      localStorage.setItem('cookies-accepted', '0');
+      banner.classList.add('hidden');
+    });
+
+    // ── Form submit ──
+    async function handleSubmit() {
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const telefone = document.getElementById('telefone').value.trim();
+      const mensagem = document.getElementById('mensagem').value.trim();
+      const consent = document.getElementById('consent').checked;
+      const errorMsg = document.getElementById('error-msg');
+      const btn = document.getElementById('btn-submit');
+      const btnText = document.getElementById('btn-text');
+
+      errorMsg.classList.remove('visible');
+
+      if (!nome || !email || !telefone) {
+        errorMsg.textContent = 'Por favor, preencha todos os campos obrigatórios.';
+        errorMsg.classList.add('visible');
+        return;
+      }
+      if (!consent) {
+        errorMsg.textContent = 'Por favor, aceite a Política de Privacidade para continuar.';
+        errorMsg.classList.add('visible');
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = 'A enviar...';
+
+      try {
+        await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nome, email, telefone, mensagem,
+            origem: 'evento-qrcode',
+            data: new Date().toISOString(),
+          }),
+        });
+        document.getElementById('form-box').style.display = 'none';
+        const successBox = document.getElementById('success-box');
+        successBox.classList.add('visible');
+        successBox.style.display = 'block';
+      } catch {
+        errorMsg.textContent = 'Ocorreu um erro ao enviar. Por favor, tente novamente.';
+        errorMsg.classList.add('visible');
+        btn.disabled = false;
+        btnText.textContent = 'Enviar mensagem';
+      }
+    }
+
+    // ── Scroll-triggered fade-in ──
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
